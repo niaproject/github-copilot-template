@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hooks.PreCompact リファレンス</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 960px; margin: 0 auto; padding: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { border-bottom: 2px solid #3b82f6; padding-bottom: 0.5rem; }
+    h2 { margin-top: 2rem; color: #1e40af; }
+    h3 { color: #374151; }
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+    th, td { border: 1px solid #d1d5db; padding: 0.5rem 0.75rem; text-align: left; }
+    th { background: #eff6ff; font-weight: 600; }
+    tr:nth-child(even) { background: #f9fafb; }
+    code { background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+    pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 6px; overflow-x: auto; }
+    pre code { background: none; color: inherit; padding: 0; }
+    .note { background: #fef9c3; border-left: 4px solid #eab308; padding: 0.75rem 1rem; margin: 1rem 0; border-radius: 0 4px 4px 0; }
+    a { color: #2563eb; }
+  </style>
+</head>
+<body>
+
+<h1>hooks.PreCompact リファレンス</h1>
+
+<h2>概要</h2>
+<p><code>PreCompact</code> はコンテキストウィンドウが上限に近づき、<strong>コンテキスト圧縮（compaction）が実行される直前</strong>に発火するフックイベントです。圧縮で失われる情報を保存したり、圧縮後のコンテキストに重要な情報を注入するために使用します。</p>
+
+<h2>トリガー条件</h2>
+<p>チャットの会話が長くなり、トークン数がモデルのコンテキストウィンドウ上限に近づくと、VS Code は自動的にコンテキスト圧縮を開始します。<code>PreCompact</code> はその圧縮処理の<strong>直前</strong>に実行されます。</p>
+
+<h2>ユースケース</h2>
+<table>
+  <thead>
+    <tr><th>ユースケース</th><th>説明</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>作業状態の保存</td><td>圧縮前に現在のタスク進捗・編集中ファイル・変数をファイルに書き出す</td></tr>
+    <tr><td>systemMessage の注入</td><td>圧縮後に引き継ぎたい情報をエージェントに渡す</td></tr>
+    <tr><td>スナップショット記録</td><td>作業ログや状態のスナップショットを記録する</td></tr>
+    <tr><td>通知・ログ</td><td>圧縮が発生したことをログに記録する</td></tr>
+  </tbody>
+</table>
+
+<h2>出力で制御できること</h2>
+<p>stdout で JSON を返すと、以下を制御できます:</p>
+<table>
+  <thead>
+    <tr><th>キー</th><th>型</th><th>効果</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>continue</code></td><td>boolean</td><td><code>false</code> にすると圧縮を中止する</td></tr>
+    <tr><td><code>stopReason</code></td><td>string</td><td>中止する場合の理由メッセージ</td></tr>
+    <tr><td><code>systemMessage</code></td><td>string</td><td><strong>圧縮後のコンテキストに注入するメッセージ</strong></td></tr>
+  </tbody>
+</table>
+<p><code>systemMessage</code> が最も実用的なキーです。圧縮で通常失われる情報（タスクの進捗、作業中のファイル一覧、重要な決定事項など）をエージェントに引き継げます。</p>
+
+<h2>なぜ systemMessage が必要か</h2>
+<p>コンテキスト圧縮が発生すると、<strong>会話の初期部分が要約・削除されます</strong>。これにより以下の情報が失われます:</p>
+<table>
+  <thead>
+    <tr><th>失われる情報</th><th>具体例</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>タスクの目的</td><td>「セキュリティ脆弱性を修正する」という最初の依頼</td></tr>
+    <tr><td>作業の進捗</td><td>5ステップ中3ステップ完了している事実</td></tr>
+    <tr><td>重要な決定事項</td><td>「方式Aではなく方式Bで実装する」と決めた経緯</td></tr>
+    <tr><td>編集中のファイル</td><td>どのファイルを変更したか</td></tr>
+    <tr><td>制約条件</td><td>ユーザーが途中で追加した条件</td></tr>
+  </tbody>
+</table>
+<p>圧縮後のエージェントは、<strong>要約された短いコンテキスト + 直近の数ターン</strong>しか見えません。<code>systemMessage</code> を返すと、圧縮後のコンテキストにその内容が<strong>強制的に残ります</strong>。</p>
+<pre><code>圧縮前: [依頼] [調査] [議論] [決定] [実装1] [実装2] [実装3]
+                ↓ 圧縮
+圧縮後: [systemMessage: 進捗と決定事項] [実装2] [実装3]</code></pre>
+<p><code>systemMessage</code> がなければ、圧縮後にエージェントが同じ質問を繰り返したり、別のアプローチに切り替えてしまうリスクがあります。</p>
+
+<h2>圧縮の流れ（すべて自動）</h2>
+<pre><code>1. コンテキストが上限に近づく
+2. PreCompact フックが自動実行 → systemMessage を生成
+3. VS Code が古い会話を自動圧縮
+4. systemMessage がコンテキストに自動注入
+5. エージェントがそのまま作業を継続</code></pre>
+<p>ユーザーは何もする必要がありません。圧縮が起きたこと自体に気づかない場合もあります。<code>systemMessage</code> はエージェント（AI側）が読む情報であり、ユーザーに対して表示されるものではありません。フックを設定しておけば、圧縮時に自動で状態が引き継がれるため、ユーザーが改めて説明し直す必要がなくなります。</p>
+
+<h2>サンプル</h2>
+
+<h3>基本: 圧縮発生をログに記録</h3>
+<pre><code>{
+  "hooks": {
+    "PreCompact": [
+      {
+        "type": "command",
+        "command": "echo \"[$(date)] Context compaction triggered\" >> .github/hooks/compact.log",
+        "windows": "echo [%date% %time%] Context compaction triggered >> .github\\hooks\\compact.log",
+        "timeout": 10
+      }
+    ]
+  }
+}</code></pre>
+
+<h3>systemMessage を注入して作業状態を引き継ぐ</h3>
+<pre><code>{
+  "hooks": {
+    "PreCompact": [
+      {
+        "type": "command",
+        "command": "echo '{\"systemMessage\": \"コンテキストが圧縮されました。作業中のファイルと進捗状況を確認してから続行してください。\"}'",
+        "windows": "echo {\"systemMessage\": \"コンテキストが圧縮されました。作業中のファイルと進捗状況を確認してから続行してください。\"}",
+        "timeout": 10
+      }
+    ]
+  }
+}</code></pre>
+
+<h3>スクリプトで動的に状態を収集して注入</h3>
+<pre><code>{
+  "hooks": {
+    "PreCompact": [
+      {
+        "type": "command",
+        "command": "./scripts/collect-context.sh",
+        "windows": "powershell -File .\\scripts\\collect-context.ps1",
+        "timeout": 15
+      }
+    ]
+  }
+}</code></pre>
+
+<p><code>collect-context.sh</code> の例:</p>
+<pre><code>#!/bin/bash
+# git の変更状態を収集して systemMessage として返す
+CHANGED_FILES=$(git diff --name-only 2>/dev/null | tr '\n' ', ')
+echo "{\"systemMessage\": \"圧縮前の状態 - 変更中のファイル: ${CHANGED_FILES:-なし}\"}"</code></pre>
+
+<p><code>collect-context.ps1</code> の例:</p>
+<pre><code># git の変更状態を収集して systemMessage として返す
+$changedFiles = (git diff --name-only 2>$null) -join ', '
+if (-not $changedFiles) { $changedFiles = "なし" }
+Write-Output "{`"systemMessage`": `"圧縮前の状態 - 変更中のファイル: $changedFiles`"}"</code></pre>
+
+<h3>圧縮を条件付きで中止する</h3>
+<pre><code>{
+  "hooks": {
+    "PreCompact": [
+      {
+        "type": "command",
+        "command": "./scripts/check-compact.sh",
+        "timeout": 10
+      }
+    ]
+  }
+}</code></pre>
+
+<pre><code>#!/bin/bash
+# 重要な処理中なら圧縮を中止する
+if [ -f ".compact-lock" ]; then
+  echo '{"continue": false, "stopReason": "重要な処理中のため圧縮を中止しました"}'
+else
+  echo '{"systemMessage": "コンテキストが圧縮されます。作業状態を確認してください。"}'
+fi</code></pre>
+
+<h2>注意事項</h2>
+<div class="note">
+  <ul>
+    <li><code>PreCompact</code> は自動的に発火するため、ユーザーが意図的にトリガーすることはできない</li>
+    <li><code>timeout</code> は短めに設定する（推奨: 10〜15秒）。長い hooks は圧縮を遅延させる</li>
+    <li><code>continue: false</code> で圧縮を中止すると、コンテキストが溢れてエラーになる可能性がある</li>
+    <li>ファイルへの書き出しは非同期的な問題を避けるため、単純なコマンドに留める</li>
+  </ul>
+</div>
+
+<h2>参考</h2>
+<ul>
+  <li><a href="https://code.visualstudio.com/docs/copilot/customization/hooks">VS Code 公式ドキュメント: Hooks</a></li>
+  <li><a href="./hooks-properties.html">hooks プロパティ リファレンス</a></li>
+</ul>
+
+</body>
+</html>

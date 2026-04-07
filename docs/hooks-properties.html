@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hooks プロパティ リファレンス</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 960px; margin: 0 auto; padding: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { border-bottom: 2px solid #3b82f6; padding-bottom: 0.5rem; }
+    h2 { margin-top: 2rem; color: #1e40af; }
+    h3 { color: #374151; }
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+    th, td { border: 1px solid #d1d5db; padding: 0.5rem 0.75rem; text-align: left; }
+    th { background: #eff6ff; font-weight: 600; }
+    tr:nth-child(even) { background: #f9fafb; }
+    code { background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+    pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 6px; overflow-x: auto; }
+    pre code { background: none; color: inherit; padding: 0; }
+    .required { color: #dc2626; font-weight: 700; }
+    .note { background: #fef9c3; border-left: 4px solid #eab308; padding: 0.75rem 1rem; margin: 1rem 0; border-radius: 0 4px 4px 0; }
+    a { color: #2563eb; }
+  </style>
+</head>
+<body>
+
+<h1>hooks プロパティ リファレンス</h1>
+<p>情報源: <a href="https://code.visualstudio.com/docs/copilot/customization/hooks">VS Code 公式ドキュメント</a> + 拡張機能ソースコード</p>
+
+<h2>フックイベント</h2>
+<table>
+  <thead>
+    <tr><th>イベント</th><th>トリガー</th><th>主な用途</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>SessionStart</code></td><td>新しいセッション開始時</td><td>環境チェック、初期コンテキスト注入</td></tr>
+    <tr><td><code>UserPromptSubmit</code></td><td>ユーザーがプロンプト送信時</td><td>入力バリデーション、ログ記録</td></tr>
+    <tr><td><code>PreToolUse</code></td><td>ツール実行前</td><td>危険なコマンドのブロック、承認要求</td></tr>
+    <tr><td><code>PostToolUse</code></td><td>ツール実行後</td><td>lint、フォーマッタ、テスト自動実行</td></tr>
+    <tr><td><code>PreCompact</code></td><td>コンテキスト圧縮前</td><td>状態保存、systemMessage 注入</td></tr>
+    <tr><td><code>SubagentStart</code></td><td>サブエージェント開始時</td><td>ログ記録、コンテキスト注入</td></tr>
+    <tr><td><code>SubagentStop</code></td><td>サブエージェント終了時</td><td>結果の記録</td></tr>
+    <tr><td><code>Stop</code></td><td>セッション終了時</td><td>クリーンアップ、ログ出力</td></tr>
+  </tbody>
+</table>
+
+<h2>JSON フォーマット</h2>
+<pre><code>{
+  "hooks": {
+    "&lt;イベント名&gt;": [
+      {
+        "type": "command",
+        "command": "デフォルトコマンド",
+        "windows": "Windows用コマンド",
+        "linux": "Linux用コマンド",
+        "osx": "macOS用コマンド",
+        "cwd": "作業ディレクトリ",
+        "env": { "KEY": "VALUE" },
+        "timeout": 30
+      }
+    ]
+  }
+}</code></pre>
+
+<h2>コマンドプロパティ</h2>
+<table>
+  <thead>
+    <tr><th>プロパティ</th><th>型</th><th>必須</th><th>説明</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>type</code></td><td>string</td><td class="required">必須</td><td><code>command</code> 固定</td></tr>
+    <tr><td><code>command</code></td><td>string</td><td class="required">必須</td><td>デフォルトで実行するシェルコマンド</td></tr>
+    <tr><td><code>windows</code></td><td>string</td><td>-</td><td>Windows 用のコマンド上書き</td></tr>
+    <tr><td><code>linux</code></td><td>string</td><td>-</td><td>Linux 用のコマンド上書き</td></tr>
+    <tr><td><code>osx</code></td><td>string</td><td>-</td><td>macOS 用のコマンド上書き</td></tr>
+    <tr><td><code>cwd</code></td><td>string</td><td>-</td><td>コマンド実行時の作業ディレクトリ</td></tr>
+    <tr><td><code>env</code></td><td>object</td><td>-</td><td>環境変数（キー・値のペア）</td></tr>
+    <tr><td><code>timeout</code></td><td>number</td><td>-</td><td>タイムアウト（秒）</td></tr>
+  </tbody>
+</table>
+
+<h2>出力制御（stdout JSON）</h2>
+
+<h3>共通出力</h3>
+<table>
+  <thead>
+    <tr><th>キー</th><th>型</th><th>効果</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>continue</code></td><td>boolean</td><td><code>false</code> で処理を中止</td></tr>
+    <tr><td><code>stopReason</code></td><td>string</td><td>中止理由メッセージ</td></tr>
+    <tr><td><code>systemMessage</code></td><td>string</td><td>コンテキストに注入するシステムメッセージ</td></tr>
+  </tbody>
+</table>
+
+<h3>PreToolUse 専用出力</h3>
+<pre><code>{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "allow | ask | deny",
+    "permissionDecisionReason": "理由"
+  }
+}</code></pre>
+<table>
+  <thead>
+    <tr><th><code>permissionDecision</code></th><th>効果</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>allow</code></td><td>ツール実行を許可</td></tr>
+    <tr><td><code>ask</code></td><td>ユーザーに確認を求める</td></tr>
+    <tr><td><code>deny</code></td><td>ツール実行を拒否</td></tr>
+  </tbody>
+</table>
+
+<h3>PostToolUse 専用出力</h3>
+<pre><code>{
+  "hookSpecificOutput": {
+    "hookEventName": "PostToolUse",
+    "decision": "block"
+  }
+}</code></pre>
+
+<h2>終了コード</h2>
+<table>
+  <thead>
+    <tr><th>コード</th><th>意味</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>0</code></td><td>成功</td></tr>
+    <tr><td><code>2</code></td><td>ブロッキングエラー（処理中断）</td></tr>
+    <tr><td>その他</td><td>非ブロッキング警告</td></tr>
+  </tbody>
+</table>
+
+<h2>配置場所</h2>
+<table>
+  <thead>
+    <tr><th>パス</th><th>スコープ</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>.github/hooks/*.json</code></td><td>ワークスペース（チーム共有、全エージェント共通）</td></tr>
+    <tr><td><code>.claude/settings.json</code></td><td>ワークスペース</td></tr>
+    <tr><td><code>.claude/settings.local.json</code></td><td>ワークスペースローカル（コミット対象外）</td></tr>
+    <tr><td><code>~/.claude/settings.json</code></td><td>ユーザーレベル</td></tr>
+    <tr><td><code>.agent.md</code> フロントマター <code>hooks</code></td><td>そのエージェントのみ（Preview）</td></tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <code>.github/hooks/</code> の JSON ファイルは全エージェントで共通実行される。特定エージェント専用にしたい場合はフロントマターの <code>hooks</code> を使用する。
+</div>
+
+<h2>前提条件</h2>
+<ul>
+  <li>VS Code 設定 <code>chat.useCustomAgentHooks</code> を <code>true</code> に設定する</li>
+  <li>hooks は Preview 機能</li>
+</ul>
+
+<h2>参考</h2>
+<ul>
+  <li><a href="https://code.visualstudio.com/docs/copilot/customization/hooks">VS Code 公式ドキュメント: Hooks</a></li>
+</ul>
+
+</body>
+</html>
