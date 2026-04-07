@@ -8,14 +8,14 @@
 |---|---|---|---|---|
 | `name` | string | **必須** | - | スキル名。1〜64文字、小文字英数字+ハイフン。**親ディレクトリ名と一致必須** |
 | `description` | string | **必須** | - | スキルの用途と使用タイミング。最大1024文字。トリガーワードを含めること |
-| `argument-hint` | string | - | `undefined` | スラッシュコマンド呼び出し時に表示されるヒントテキスト |
+| `argument-hint` | string | - | - | スラッシュコマンド呼び出し時に表示されるヒントテキスト |
 | `user-invocable` | boolean | - | `true` | `/` メニュー（スラッシュコマンド）に表示するか |
 | `disable-model-invocation` | boolean | - | `false` | モデルによる自動読み込みを無効化するか |
-| `model` | string / list | - | `undefined` | 使用するAIモデル（配列でフォールバック指定可） |
-| `tools` | list | - | `[]` | 使用可能ツール |
-| `agents` | list | - | `undefined` | 使用可能サブエージェント |
-| `target` | string | - | `undefined` | 実行ターゲット (`vscode`, `github-copilot`) |
-| `handoffs` | list | - | `undefined` | ハンドオフ定義 |
+| `license` | string | - | - | ライセンス情報 |
+| `compatibility` | object | - | - | 互換性情報 |
+| `metadata` | object | - | - | メタデータ（注釈データ） |
+
+> **注意**: `model`, `tools`, `agents`, `target`, `handoffs` は `.agent.md` 専用の属性であり、SKILL.md では使用できません。
 
 ## `user-invocable` と `disable-model-invocation` の動作マトリクス
 

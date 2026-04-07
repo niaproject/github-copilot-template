@@ -11,11 +11,9 @@
 | `argument-hint` | string | - | - | スラッシュコマンド呼び出し時に表示されるヒント |
 | `user-invocable` | boolean | - | `true` | `/` メニュー（スラッシュコマンド）に表示するか |
 | `disable-model-invocation` | boolean | - | `false` | モデルによる自動読み込みを無効化するか |
-| `model` | string / list | - | - | 使用するAIモデル（配列でフォールバック指定可） |
-| `tools` | list | - | `[]` | 使用可能ツール |
-| `agents` | list | - | - | 使用可能サブエージェント |
-| `target` | string | - | - | 実行ターゲット (`vscode`, `github-copilot`) |
-| `handoffs` | list | - | - | ハンドオフ定義 |
+| `license` | string | - | - | ライセンス情報 |
+| `compatibility` | object | - | - | 互換性情報 |
+| `metadata` | object | - | - | メタデータ（注釈データ） |
 
 ## 動作マトリクス
 
@@ -70,10 +68,10 @@ description: "Web アプリを Playwright でテストするスキル。Use when
 argument-hint: "[テスト対象ページ] [オプション]"
 user-invocable: true
 disable-model-invocation: false
-model: "Claude Sonnet 4"
-tools: [read, edit, execute]
 ---
 ```
+
+> **注意**: `model`, `tools`, `agents`, `target`, `handoffs` は `.agent.md` 専用の属性であり、SKILL.md では使用できません。
 
 ## プログレッシブローディング
 

@@ -2,6 +2,7 @@
 name: Skill Creator
 description: "SKILL.md ファイルを生成するエージェント。Use when: 新しいスキルを作成したい、SKILL.md のテンプレートが必要、スキルのフォルダ構造を構築したい"
 tools: [read, edit, search, web]
+model: Claude Opus 4.6 (copilot)
 ---
 
 # Role

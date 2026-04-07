@@ -36,11 +36,9 @@
     <tr><td><code>argument-hint</code></td><td>string</td><td>-</td><td>-</td><td>スラッシュコマンド呼び出し時に表示されるヒント</td></tr>
     <tr><td><code>user-invocable</code></td><td>boolean</td><td>-</td><td><code>true</code></td><td><code>/</code> メニュー（スラッシュコマンド）に表示するか</td></tr>
     <tr><td><code>disable-model-invocation</code></td><td>boolean</td><td>-</td><td><code>false</code></td><td>モデルによる自動読み込みを無効化するか</td></tr>
-    <tr><td><code>model</code></td><td>string / list</td><td>-</td><td>-</td><td>使用するAIモデル（配列でフォールバック指定可）</td></tr>
-    <tr><td><code>tools</code></td><td>list</td><td>-</td><td><code>[]</code></td><td>使用可能ツール</td></tr>
-    <tr><td><code>agents</code></td><td>list</td><td>-</td><td>-</td><td>使用可能サブエージェント</td></tr>
-    <tr><td><code>target</code></td><td>string</td><td>-</td><td>-</td><td>実行ターゲット (<code>vscode</code>, <code>github-copilot</code>)</td></tr>
-    <tr><td><code>handoffs</code></td><td>list</td><td>-</td><td>-</td><td>ハンドオフ定義</td></tr>
+    <tr><td><code>license</code></td><td>string</td><td>-</td><td>-</td><td>ライセンス情報</td></tr>
+    <tr><td><code>compatibility</code></td><td>object</td><td>-</td><td>-</td><td>互換性情報</td></tr>
+    <tr><td><code>metadata</code></td><td>object</td><td>-</td><td>-</td><td>メタデータ（注釈データ）</td></tr>
   </tbody>
 </table>
 
@@ -102,9 +100,8 @@ description: "Web アプリを Playwright でテストするスキル。Use when
 argument-hint: "[テスト対象ページ] [オプション]"
 user-invocable: true
 disable-model-invocation: false
-model: "Claude Sonnet 4"
-tools: [read, edit, execute]
 ---</code></pre>
+<p><strong>注意</strong>: <code>model</code>, <code>tools</code>, <code>agents</code>, <code>target</code>, <code>handoffs</code> は <code>.agent.md</code> 専用の属性であり、SKILL.md では使用できません。</p>
 
 <h2>プログレッシブローディング</h2>
 <ol>

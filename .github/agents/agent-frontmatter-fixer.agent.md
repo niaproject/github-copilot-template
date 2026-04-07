@@ -2,6 +2,7 @@
 name: Agent Frontmatter Fixer
 description: ".agent.md ファイルのYAMLフロントマター警告・エラーを診断し修正するエージェント。Use when: フロントマターの警告が出ている、Unknown property エラー、YAML構文エラー"
 tools: [read, edit, search]
+model: Claude Opus 4.6 (copilot)
 ---
 
 # Role
