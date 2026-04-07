@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>.agent.md フロントマタープロパティ リファレンス</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 960px; margin: 0 auto; padding: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { border-bottom: 2px solid #3b82f6; padding-bottom: 0.5rem; }
+    h2 { margin-top: 2rem; color: #1e40af; }
+    h3 { color: #374151; }
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+    th, td { border: 1px solid #d1d5db; padding: 0.5rem 0.75rem; text-align: left; }
+    th { background: #eff6ff; font-weight: 600; }
+    tr:nth-child(even) { background: #f9fafb; }
+    code { background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+    pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 6px; overflow-x: auto; }
+    pre code { background: none; color: inherit; padding: 0; }
+    .required { color: #dc2626; font-weight: 700; }
+    a { color: #2563eb; }
+  </style>
+</head>
+<body>
+
+<h1>.agent.md フロントマタープロパティ リファレンス</h1>
+<p>情報源: <a href="https://code.visualstudio.com/docs/copilot/customization/custom-agents">VS Code 公式ドキュメント</a> + 拡張機能ソースコード</p>
+
+<h2>フロントマタープロパティ</h2>
+<table>
+  <thead>
+    <tr><th>プロパティ</th><th>型</th><th>必須</th><th>デフォルト</th><th>説明</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>name</code></td><td>string</td><td>-</td><td>ファイル名</td><td>エージェント名</td></tr>
+    <tr><td><code>description</code></td><td>string</td><td class="required">必須</td><td>-</td><td>説明文（エージェント選択・サブエージェント検出に使用）</td></tr>
+    <tr><td><code>tools</code></td><td>list</td><td>-</td><td>デフォルトツール</td><td>使用可能ツール（エイリアス、MCP <code>&lt;server&gt;/*</code>、拡張ツール）</td></tr>
+    <tr><td><code>model</code></td><td>string / list</td><td>-</td><td>ピッカー選択値</td><td>AIモデル（配列でフォールバック指定可）</td></tr>
+    <tr><td><code>argument-hint</code></td><td>string</td><td>-</td><td>-</td><td>チャット入力フィールドのヒントテキスト</td></tr>
+    <tr><td><code>agents</code></td><td>list</td><td>-</td><td>全許可</td><td>サブエージェント制限（<code>*</code> = 全許可、<code>[]</code> = 禁止）</td></tr>
+    <tr><td><code>user-invocable</code></td><td>boolean</td><td>-</td><td><code>true</code></td><td>エージェントピッカーに表示するか</td></tr>
+    <tr><td><code>disable-model-invocation</code></td><td>boolean</td><td>-</td><td><code>false</code></td><td>サブエージェントとしての自動呼び出しを禁止</td></tr>
+    <tr><td><code>target</code></td><td>string</td><td>-</td><td>-</td><td><code>vscode</code> or <code>github-copilot</code></td></tr>
+    <tr><td><code>mcp-servers</code></td><td>object</td><td>-</td><td>-</td><td>MCP サーバー構成</td></tr>
+    <tr><td><code>handoffs</code></td><td>list</td><td>-</td><td>-</td><td>ハンドオフ定義</td></tr>
+    <tr><td><code>hooks</code></td><td>object</td><td>-</td><td>-</td><td>フック定義（Preview）</td></tr>
+    <tr><td><code>metadata</code></td><td>object</td><td>-</td><td>-</td><td>注釈データ</td></tr>
+  </tbody>
+</table>
+
+<h2><code>github</code> オブジェクト</h2>
+<p><code>github</code> 内では <strong><code>permissions</code> のみ有効</strong>。</p>
+<pre><code>github:
+  permissions:
+    contents: read
+    issues: read
+    pull-requests: write</code></pre>
+
+<h2>ツールエイリアス</h2>
+<table>
+  <thead>
+    <tr><th>エイリアス</th><th>用途</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>execute</code></td><td>シェルコマンド実行</td></tr>
+    <tr><td><code>read</code></td><td>ファイル読み取り</td></tr>
+    <tr><td><code>edit</code></td><td>ファイル編集</td></tr>
+    <tr><td><code>search</code></td><td>ファイル・テキスト検索</td></tr>
+    <tr><td><code>agent</code></td><td>サブエージェント呼び出し</td></tr>
+    <tr><td><code>web</code></td><td>URL取得・Web検索</td></tr>
+    <tr><td><code>todo</code></td><td>タスクリスト管理</td></tr>
+  </tbody>
+</table>
+
+<h3>ツール指定パターン</h3>
+<pre><code>tools: [read, search]             # 読み取り専用
+tools: [myserver/*]               # MCP サーバーのみ
+tools: [read, edit, search]       # ターミナルなし
+tools: []                         # 会話のみ（ツールなし）</code></pre>
+
+<h2><code>handoffs</code> オブジェクト</h2>
+<table>
+  <thead>
+    <tr><th>キー</th><th>型</th><th>必須</th><th>説明</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>label</code></td><td>string</td><td class="required">必須</td><td>ボタン表示テキスト</td></tr>
+    <tr><td><code>agent</code></td><td>string</td><td class="required">必須</td><td>遷移先エージェント名</td></tr>
+    <tr><td><code>prompt</code></td><td>string</td><td class="required">必須</td><td>送信するプロンプト</td></tr>
+    <tr><td><code>send</code></td><td>boolean</td><td>-</td><td>自動送信（default: <code>false</code>）</td></tr>
+    <tr><td><code>model</code></td><td>string</td><td>-</td><td>遷移先で使用するモデル</td></tr>
+  </tbody>
+</table>
+<pre><code>handoffs:
+  - label: "実装を開始"
+    agent: implementation
+    prompt: "上記のプランに基づいて実装してください"
+    send: false
+    model: "GPT-5 (copilot)"</code></pre>
+
+<h2>呼び出し制御マトリクス</h2>
+<table>
+  <thead>
+    <tr><th>設定</th><th>ピッカー表示</th><th>サブエージェント呼び出し</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>両方省略（デフォルト）</td><td>表示</td><td>許可</td></tr>
+    <tr><td><code>user-invocable: false</code></td><td>非表示</td><td>許可</td></tr>
+    <tr><td><code>disable-model-invocation: true</code></td><td>表示</td><td>禁止</td></tr>
+    <tr><td>両方設定</td><td>非表示</td><td>禁止</td></tr>
+  </tbody>
+</table>
+
+<h2>配置場所</h2>
+<table>
+  <thead>
+    <tr><th>パス</th><th>スコープ</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>.github/agents/</code></td><td>ワークスペース</td></tr>
+    <tr><td><code>.claude/agents/</code></td><td>ワークスペース（Claude形式）</td></tr>
+    <tr><td><code>~/.copilot/agents/</code></td><td>ユーザー（個人）</td></tr>
+  </tbody>
+</table>
+
+<h2>YAML 記述例</h2>
+<pre><code>---
+name: Bug Fix Agent
+description: "バグ修正に特化したエージェント。Use when: バグ修正、Issue対応、デバッグ"
+tools: [read, edit, search, todo]
+model: "Claude Sonnet 4"
+argument-hint: "修正対象のIssue番号や概要"
+user-invocable: true
+github:
+  permissions:
+    contents: read
+    issues: read
+handoffs:
+  - label: "コードレビューへ"
+    agent: code-review
+    prompt: "上記の修正をレビューしてください"
+---</code></pre>
+
+<h2>参考</h2>
+<ul>
+  <li><a href="https://code.visualstudio.com/docs/copilot/customization/custom-agents">VS Code 公式ドキュメント: Custom agents</a></li>
+</ul>
+
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SKILL.md フロントマタープロパティ リファレンス</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 960px; margin: 0 auto; padding: 2rem; color: #1f2937; line-height: 1.6; }
+    h1 { border-bottom: 2px solid #3b82f6; padding-bottom: 0.5rem; }
+    h2 { margin-top: 2rem; color: #1e40af; }
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+    th, td { border: 1px solid #d1d5db; padding: 0.5rem 0.75rem; text-align: left; }
+    th { background: #eff6ff; font-weight: 600; }
+    tr:nth-child(even) { background: #f9fafb; }
+    code { background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+    pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 6px; overflow-x: auto; }
+    pre code { background: none; color: inherit; padding: 0; }
+    .required { color: #dc2626; font-weight: 700; }
+    .note { background: #fef9c3; border-left: 4px solid #eab308; padding: 0.75rem 1rem; margin: 1rem 0; border-radius: 0 4px 4px 0; }
+    a { color: #2563eb; }
+  </style>
+</head>
+<body>
+
+<h1>SKILL.md フロントマタープロパティ リファレンス</h1>
+<p>情報源: <a href="https://code.visualstudio.com/docs/copilot/customization/agent-skills">VS Code 公式ドキュメント</a> + 拡張機能ソースコード</p>
+
+<h2>フロントマタープロパティ</h2>
+<table>
+  <thead>
+    <tr><th>プロパティ</th><th>型</th><th>必須</th><th>デフォルト</th><th>説明</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>name</code></td><td>string</td><td class="required">必須</td><td>-</td><td>スキル名。1〜64文字、小文字英数字+ハイフン。<strong>親ディレクトリ名と一致必須</strong></td></tr>
+    <tr><td><code>description</code></td><td>string</td><td class="required">必須</td><td>-</td><td>スキルの用途と使用タイミング。最大1024文字</td></tr>
+    <tr><td><code>argument-hint</code></td><td>string</td><td>-</td><td>-</td><td>スラッシュコマンド呼び出し時に表示されるヒント</td></tr>
+    <tr><td><code>user-invocable</code></td><td>boolean</td><td>-</td><td><code>true</code></td><td><code>/</code> メニュー（スラッシュコマンド）に表示するか</td></tr>
+    <tr><td><code>disable-model-invocation</code></td><td>boolean</td><td>-</td><td><code>false</code></td><td>モデルによる自動読み込みを無効化するか</td></tr>
+    <tr><td><code>model</code></td><td>string / list</td><td>-</td><td>-</td><td>使用するAIモデル（配列でフォールバック指定可）</td></tr>
+    <tr><td><code>tools</code></td><td>list</td><td>-</td><td><code>[]</code></td><td>使用可能ツール</td></tr>
+    <tr><td><code>agents</code></td><td>list</td><td>-</td><td>-</td><td>使用可能サブエージェント</td></tr>
+    <tr><td><code>target</code></td><td>string</td><td>-</td><td>-</td><td>実行ターゲット (<code>vscode</code>, <code>github-copilot</code>)</td></tr>
+    <tr><td><code>handoffs</code></td><td>list</td><td>-</td><td>-</td><td>ハンドオフ定義</td></tr>
+  </tbody>
+</table>
+
+<h2>動作マトリクス</h2>
+<table>
+  <thead>
+    <tr><th>設定</th><th><code>/</code> コマンド</th><th>モデル自動ロード</th><th>ユースケース</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>両方省略（デフォルト）</td><td>表示</td><td>有効</td><td>汎用スキル</td></tr>
+    <tr><td><code>user-invocable: false</code></td><td>非表示</td><td>有効</td><td>バックグラウンド知識スキル</td></tr>
+    <tr><td><code>disable-model-invocation: true</code></td><td>表示</td><td>無効</td><td>オンデマンド専用スキル</td></tr>
+    <tr><td>両方設定</td><td>非表示</td><td>無効</td><td>無効化されたスキル</td></tr>
+  </tbody>
+</table>
+
+<h2><code>name</code> のルール</h2>
+<ul>
+  <li>小文字英数字とハイフン (<code>-</code>) のみ使用可能</li>
+  <li>1〜64 文字</li>
+  <li>親ディレクトリ名と完全一致しなければならない</li>
+  <li>例: <code>.github/skills/my-skill/SKILL.md</code> → <code>name: my-skill</code></li>
+</ul>
+
+<h2><code>description</code> のベストプラクティス</h2>
+<ul>
+  <li>最大 1024 文字</li>
+  <li>"Use when:" パターンでトリガーワードを含める</li>
+  <li>具体的なキーワードを入れる（エージェントが検出に使用するため）</li>
+  <li>曖昧な表現（"便利なスキル"）は避ける</li>
+</ul>
+
+<h2>フォルダ構造</h2>
+<pre><code>.github/skills/&lt;skill-name&gt;/
+├── SKILL.md           # 必須
+├── scripts/           # 実行可能スクリプト
+├── references/        # 参照ドキュメント
+└── assets/            # テンプレート、ボイラープレート</code></pre>
+
+<h2>配置場所</h2>
+<table>
+  <thead>
+    <tr><th>パス</th><th>スコープ</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>.github/skills/&lt;name&gt;/</code></td><td>プロジェクト</td></tr>
+    <tr><td><code>.agents/skills/&lt;name&gt;/</code></td><td>プロジェクト</td></tr>
+    <tr><td><code>.claude/skills/&lt;name&gt;/</code></td><td>プロジェクト</td></tr>
+    <tr><td><code>~/.copilot/skills/&lt;name&gt;/</code></td><td>ユーザー（個人）</td></tr>
+    <tr><td><code>~/.agents/skills/&lt;name&gt;/</code></td><td>ユーザー（個人）</td></tr>
+    <tr><td><code>~/.claude/skills/&lt;name&gt;/</code></td><td>ユーザー（個人）</td></tr>
+  </tbody>
+</table>
+
+<h2>YAML 記述例</h2>
+<pre><code>---
+name: webapp-testing
+description: "Web アプリを Playwright でテストするスキル。Use when: フロントエンド検証、UI デバッグ、スクリーンショット取得"
+argument-hint: "[テスト対象ページ] [オプション]"
+user-invocable: true
+disable-model-invocation: false
+model: "Claude Sonnet 4"
+tools: [read, edit, execute]
+---</code></pre>
+
+<h2>プログレッシブローディング</h2>
+<ol>
+  <li><strong>Discovery</strong> (~100トークン): <code>name</code> と <code>description</code> のみ読み取り</li>
+  <li><strong>Instructions</strong> (&lt;5000トークン): 関連時に SKILL.md 本文をロード</li>
+  <li><strong>Resources</strong>: 参照されたファイルのみ追加ロード</li>
+</ol>
+
+<h2>参考</h2>
+<ul>
+  <li><a href="https://code.visualstudio.com/docs/copilot/customization/agent-skills">VS Code 公式ドキュメント: Agent Skills</a></li>
+  <li><a href="https://agentskills.io/">Agent Skills 仕様: agentskills.io</a></li>
+</ul>
+
+</body>
+</html>
