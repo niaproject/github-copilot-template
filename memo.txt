@@ -1,0 +1,10 @@
+
+https://zenn.dev/utsutaka/articles/ce91c0d8ded1e6
+
+カテゴリ	ファイルパス	主な役割	発動条件
+全体指示	copilot-instructions.md	リポジトリ全体の基本ルール	常時・自動
+個別指示	instructions/*.md	特定のパスや言語にのみ適用	条件付き自動 (パス一致時)
+プロンプト	prompts/*.prompt.md	定型タスクの呼び出しコマンド	手動 (/ コマンド)
+エージェント	agents/*.md	特定の専門家（ペルソナ）の定義	手動 (@ メンション)
+スキル	skills/*/SKILL.md	専門的な能力やツールのセット	動的自動 (AI判断時)
+
